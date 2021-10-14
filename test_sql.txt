@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS todo(
+id VARCHAR(100) NOT NULL PRIMARY KEY,
+userid VARCHAR(100) NOT NULL,
+title VARCHAR(100) NOT NULL,
+done boolean DEFAULT false
+);
+
+SELECT * FROM todo;
+
+INSERT INTO todo VALUES ('1','a','공부하기',false);
+INSERT INTO todo VALUES ('2','b','운동하기',false);
