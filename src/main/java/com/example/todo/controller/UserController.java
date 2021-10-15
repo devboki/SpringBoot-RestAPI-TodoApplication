@@ -3,6 +3,7 @@ package com.example.todo.controller;
 import com.example.todo.dto.ResponseDTO;
 import com.example.todo.dto.UserDTO;
 import com.example.todo.model.UserEntity;
+import com.example.todo.security.TokenProvider;
 import com.example.todo.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class UserController {
     }
 
     //LOGIN
-    @PostMapping("/signin")
+    /* @PostMapping("/signin")
     public ResponseEntity<?> authenticate(@RequestBody UserDTO userDTO){
         UserEntity user = userService.getByCredentials(userDTO.getEmail(), userDTO.getPassword());
         if(user != null){
@@ -60,6 +61,32 @@ public class UserController {
         }
     }
 
-    //------------------------------- 여기까지는 로그인 상태 유지 X, 사용자의 로그인 여부를 확인하지 않음, 패스워드를 암호화하지 않음.
+    //------------ 여기까지는 로그인 상태 유지 X, 사용자의 로그인 여부를 확인하지 않음, 패스워드를 암호화하지 않음. */
+    //----------------------- 이후 JWT 와 Security 를 사용해 인증
+
+    @Autowired
+    private TokenProvider tokenProvider;
+
+    @PostMapping("/signin")
+    public ResponseEntity<?> authenticate(@RequestBody UserDTO userDTO){
+        UserEntity user = userService.getByCredentials(userDTO.getEmail(),userDTO.getPassword());
+        if(user != null){                                       //user 정보가 있으면
+            final String token = tokenProvider.create(user);    //token 생성
+            final UserDTO responseUserDTO = UserDTO.builder()
+                    .email(user.getUsername())
+                    .id(user.getId())
+                    .token(token)
+                    .build();
+            return ResponseEntity.ok().body(responseUserDTO);
+        }else{
+            ResponseDTO responseDTO = ResponseDTO.builder()
+                    .error("Login failed.")
+                    .build();
+            return ResponseEntity
+                    .badRequest()
+                    .body(responseDTO);
+        }
+    }//POST localhost:8080/auth/signup email, username, password 로 계정 생성 후
+     //POST localhost:8080/auth/signin email, password 로 요청시 token return 확인
 
 }//controller-end
