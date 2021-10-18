@@ -8,6 +8,8 @@ import com.example.todo.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,9 +69,12 @@ public class UserController {
     @Autowired
     private TokenProvider tokenProvider;
 
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     @PostMapping("/signin")
     public ResponseEntity<?> authenticate(@RequestBody UserDTO userDTO){
-        UserEntity user = userService.getByCredentials(userDTO.getEmail(),userDTO.getPassword());
+        //UserEntity user = userService.getByCredentials(userDTO.getEmail(), userDTO.getPassword());
+        UserEntity user = userService.getByCredentials(userDTO.getEmail(), userDTO.getPassword(), passwordEncoder);
         if(user != null){                                       //user 정보가 있으면
             final String token = tokenProvider.create(user);    //token 생성
             final UserDTO responseUserDTO = UserDTO.builder()
@@ -88,5 +93,7 @@ public class UserController {
         }
     }//POST localhost:8080/auth/signup email, username, password 로 계정 생성 후
      //POST localhost:8080/auth/signin email, password 로 요청시 token return 확인
+
+
 
 }//controller-end
